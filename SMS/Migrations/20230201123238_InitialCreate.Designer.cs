@@ -12,7 +12,7 @@ using SMS.Data;
 namespace SMS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230131164352_InitialCreate")]
+    [Migration("20230201123238_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

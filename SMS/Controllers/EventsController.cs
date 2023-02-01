@@ -21,7 +21,8 @@ namespace SMS.Controllers
 
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Events.ToListAsync());
+            var result = await _context.Events.Include(j => j.Category).ToListAsync();
+            return View(result);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -32,6 +33,7 @@ namespace SMS.Controllers
             }
 
             var @event = await _context.Events
+                .Include(e => e.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
             {
@@ -52,13 +54,10 @@ namespace SMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CategoryId,Created")] Event @event)
         {
-            ModelState.Remove("Category");
-            if (ModelState.IsValid)
-            {
-                _context.Add(@event);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));       
-            }
+
+            _context.Add(@event);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));       
 
             var categories = _context.EventCategories.ToList();
             ViewBag.Categories = new SelectList(categories, "Id", "Name");
@@ -125,6 +124,7 @@ namespace SMS.Controllers
             }
 
             var @event = await _context.Events
+                .Include(e => e.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@event == null)
             {
