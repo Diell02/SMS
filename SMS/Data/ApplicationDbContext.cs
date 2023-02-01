@@ -16,5 +16,6 @@ namespace SMS.Data
         public DbSet<Grade> Grades { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Subject> Subjects { get; set; }
+        public DbSet<Post> Posts { get; set; }
     }
 }

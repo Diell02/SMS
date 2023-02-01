@@ -21,7 +21,8 @@ namespace SMS.Controllers
 
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Grades.ToListAsync());
+            var applicationDbContext = _context.Grades.Include(g => g.Subject);
+            return View(await applicationDbContext.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -32,6 +33,7 @@ namespace SMS.Controllers
             }
 
             var grade = await _context.Grades
+                .Include(g => g.Subject)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (grade == null)
             {
@@ -43,20 +45,19 @@ namespace SMS.Controllers
 
         public IActionResult Create()
         {
+            var subjects = _context.Subjects.ToList();
+            ViewBag.Subjects = new SelectList(subjects, "Id", "Name");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,GradeS")] Grade grade)
+        public async Task<IActionResult> Create([Bind("Id,SubjectId,GradeS")] Grade grade)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(grade);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(grade);
+            _context.Add(grade);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -71,18 +72,20 @@ namespace SMS.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Subjects = new SelectList(_context.Subjects, "Id", "Name");
             return View(grade);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,GradeS")] Grade grade)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,SubjectId,GradeS")] Grade grade)
         {
             if (id != grade.Id)
             {
                 return NotFound();
             }
 
+            ModelState.Remove("Subject");
             if (ModelState.IsValid)
             {
                 try
@@ -103,6 +106,7 @@ namespace SMS.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Id", grade.SubjectId);
             return View(grade);
         }
 
@@ -114,6 +118,7 @@ namespace SMS.Controllers
             }
 
             var grade = await _context.Grades
+                .Include(g => g.Subject)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (grade == null)
             {
@@ -136,14 +141,14 @@ namespace SMS.Controllers
             {
                 _context.Grades.Remove(grade);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool GradeExists(int id)
         {
-          return _context.Grades.Any(e => e.Id == id);
+            return _context.Grades.Any(e => e.Id == id);
         }
     }
 }

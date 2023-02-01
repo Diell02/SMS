@@ -10,85 +10,81 @@ using SMS.Models;
 
 namespace SMS.Controllers
 {
-    public class SubjectsController : Controller
+    public class PostsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public SubjectsController(ApplicationDbContext context)
+        public PostsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Subjects
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Subjects.ToListAsync());
+            var applicationDbContext = _context.Posts.Include(p => p.Group);
+            return View(await applicationDbContext.ToListAsync());
         }
 
-        // GET: Subjects/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Subjects == null)
+            if (id == null || _context.Posts == null)
             {
                 return NotFound();
             }
 
-            var subject = await _context.Subjects
+            var post = await _context.Posts
+                .Include(p => p.Group)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (subject == null)
+            if (post == null)
             {
                 return NotFound();
             }
 
-            return View(subject);
+            return View(post);
         }
 
-        // GET: Subjects/Create
         public IActionResult Create()
         {
+            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id");
             return View();
         }
 
-        // POST: Subjects/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Teacher")] Subject subject)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreatedAtUTC,Username,CreatedBy,GroupId")] Post post)
         {
+            ModelState.Remove("CreatedBy");
             if (ModelState.IsValid)
             {
-                _context.Add(subject);
+                _context.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(subject);
+            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id", post.GroupId);
+            return View(post);
         }
 
-        // GET: Subjects/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Subjects == null)
+            if (id == null || _context.Posts == null)
             {
                 return NotFound();
             }
 
-            var subject = await _context.Subjects.FindAsync(id);
-            if (subject == null)
+            var post = await _context.Posts.FindAsync(id);
+            if (post == null)
             {
                 return NotFound();
             }
-            return View(subject);
+            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id", post.GroupId);
+            return View(post);
         }
 
-        // POST: Subjects/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Teacher")] Subject subject)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CreatedAtUTC,Username,CreatedBy,GroupId")] Post post)
         {
-            if (id != subject.Id)
+            if (id != post.Id)
             {
                 return NotFound();
             }
@@ -97,12 +93,12 @@ namespace SMS.Controllers
             {
                 try
                 {
-                    _context.Update(subject);
+                    _context.Update(post);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SubjectExists(subject.Id))
+                    if (!PostExists(post.Id))
                     {
                         return NotFound();
                     }
@@ -113,49 +109,49 @@ namespace SMS.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(subject);
+            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id", post.GroupId);
+            return View(post);
         }
 
-        // GET: Subjects/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Subjects == null)
+            if (id == null || _context.Posts == null)
             {
                 return NotFound();
             }
 
-            var subject = await _context.Subjects
+            var post = await _context.Posts
+                .Include(p => p.Group)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (subject == null)
+            if (post == null)
             {
                 return NotFound();
             }
 
-            return View(subject);
+            return View(post);
         }
 
-        // POST: Subjects/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Subjects == null)
+            if (_context.Posts == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Subjects'  is null.");
+                return Problem("Entity set 'ApplicationDbContext.Post'  is null.");
             }
-            var subject = await _context.Subjects.FindAsync(id);
-            if (subject != null)
+            var post = await _context.Posts.FindAsync(id);
+            if (post != null)
             {
-                _context.Subjects.Remove(subject);
+                _context.Posts.Remove(post);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool SubjectExists(int id)
+        private bool PostExists(int id)
         {
-          return _context.Subjects.Any(e => e.Id == id);
+          return _context.Posts.Any(e => e.Id == id);
         }
     }
 }

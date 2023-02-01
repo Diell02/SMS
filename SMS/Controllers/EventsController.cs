@@ -54,15 +54,10 @@ namespace SMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CategoryId,Created")] Event @event)
         {
-
             _context.Add(@event);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));       
 
-            var categories = _context.EventCategories.ToList();
-            ViewBag.Categories = new SelectList(categories, "Id", "Name");
-
-            return View(@event);
         }
 
         public async Task<IActionResult> Edit(int? id)

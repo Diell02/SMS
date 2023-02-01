@@ -13,6 +13,9 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.Subject)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.GradeS)
             </th>
             <th></th>
@@ -21,6 +24,9 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Subject.Name)
+            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.GradeS)
             </td>

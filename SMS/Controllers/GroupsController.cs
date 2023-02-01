@@ -19,11 +19,14 @@ namespace SMS.Controllers
             _context = context;
         }
 
+        // GET: Groups
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Groups.ToListAsync());
+            var applicationDbContext = _context.Groups.Include(g => g.Subject);
+            return View(await applicationDbContext.ToListAsync());
         }
 
+        // GET: Groups/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Groups == null)
@@ -32,6 +35,7 @@ namespace SMS.Controllers
             }
 
             var @group = await _context.Groups
+                .Include(g => g.Subject)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@group == null)
             {
@@ -43,20 +47,18 @@ namespace SMS.Controllers
 
         public IActionResult Create()
         {
+            var subjects = _context.Subjects.ToList();
+            ViewBag.Subjects = new SelectList(subjects, "Id", "Name");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description")] Group @group)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,SubjectId")] Group @group)
         {
-            if (ModelState.IsValid)
-            {
                 _context.Add(@group);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
-            return View(@group);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -71,18 +73,20 @@ namespace SMS.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Subjects = new SelectList(_context.Subjects, "Id", "Name");
             return View(@group);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description")] Group @group)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,SubjectId")] Group @group)
         {
             if (id != @group.Id)
             {
                 return NotFound();
             }
 
+            ModelState.Remove("Subject");
             if (ModelState.IsValid)
             {
                 try
@@ -103,6 +107,7 @@ namespace SMS.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Id", @group.SubjectId);
             return View(@group);
         }
 
@@ -114,6 +119,7 @@ namespace SMS.Controllers
             }
 
             var @group = await _context.Groups
+                .Include(g => g.Subject)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (@group == null)
             {
