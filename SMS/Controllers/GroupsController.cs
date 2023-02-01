@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,20 +14,21 @@ namespace SMS.Controllers
     public class GroupsController : Controller
     {
         private readonly SMSContext _context;
+        private readonly UserManager<SMSUser> _userManager;
 
-        public GroupsController(SMSContext context)
+
+        public GroupsController(SMSContext context, UserManager<SMSUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        // GET: Groups
         public async Task<IActionResult> Index()
         {
             var context = _context.Groups.Include(g => g.Subject);
             return View(await context.ToListAsync());
         }
 
-        // GET: Groups/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Groups == null)
@@ -54,9 +56,20 @@ namespace SMS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,SubjectId")] Group @group)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,CreatedBy,SubjectId")] Group @group)
         {
-            _context.Add(@group);
+            var userId = _userManager.GetUserId(HttpContext.User);
+            SMSUser user = await _userManager.FindByIdAsync(userId);
+
+            var newGroup = new Group
+            {
+                Name = @group.Name,
+                Description = @group.Description,
+                CreatedBy = user.FirstName,
+                SubjectId = @group.SubjectId
+            };
+
+            _context.Add(newGroup);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -79,24 +92,28 @@ namespace SMS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,SubjectId")] Group @group)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,SubjectId")] Group group)
         {
-            if (id != @group.Id)
+            if (id != group.Id)
             {
                 return NotFound();
             }
 
             ModelState.Remove("Subject");
+            ModelState.Remove("CreatedBy");
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(@group);
+                    var existingGroup = await _context.Groups.FindAsync(id);
+                    group.CreatedBy = existingGroup.CreatedBy;
+
+                    _context.Update(group);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!GroupExists(@group.Id))
+                    if (!GroupExists(group.Id))
                     {
                         return NotFound();
                     }
@@ -107,8 +124,8 @@ namespace SMS.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Id", @group.SubjectId);
-            return View(@group);
+
+            return View(group);
         }
 
         public async Task<IActionResult> Delete(int? id)
