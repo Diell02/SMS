@@ -12,9 +12,9 @@ namespace SMS.Controllers
 {
     public class GroupsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly SMSContext _context;
 
-        public GroupsController(ApplicationDbContext context)
+        public GroupsController(SMSContext context)
         {
             _context = context;
         }
@@ -22,8 +22,8 @@ namespace SMS.Controllers
         // GET: Groups
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Groups.Include(g => g.Subject);
-            return View(await applicationDbContext.ToListAsync());
+            var context = _context.Groups.Include(g => g.Subject);
+            return View(await context.ToListAsync());
         }
 
         // GET: Groups/Details/5
@@ -56,9 +56,9 @@ namespace SMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,SubjectId")] Group @group)
         {
-                _context.Add(@group);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            _context.Add(@group);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -142,14 +142,14 @@ namespace SMS.Controllers
             {
                 _context.Groups.Remove(@group);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool GroupExists(int id)
         {
-          return _context.Groups.Any(e => e.Id == id);
+            return _context.Groups.Any(e => e.Id == id);
         }
     }
 }

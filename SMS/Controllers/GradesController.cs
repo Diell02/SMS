@@ -12,17 +12,17 @@ namespace SMS.Controllers
 {
     public class GradesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly SMSContext _context;
 
-        public GradesController(ApplicationDbContext context)
+        public GradesController(SMSContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Grades.Include(g => g.Subject);
-            return View(await applicationDbContext.ToListAsync());
+            var context = _context.Grades.Include(g => g.Subject);
+            return View(await context.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)

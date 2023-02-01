@@ -12,9 +12,9 @@ namespace SMS.Controllers
 {
     public class SubjectsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly SMSContext _context;
 
-        public SubjectsController(ApplicationDbContext context)
+        public SubjectsController(SMSContext context)
         {
             _context = context;
         }
@@ -22,7 +22,7 @@ namespace SMS.Controllers
         // GET: Subjects
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Subjects.ToListAsync());
+            return View(await _context.Subjects.ToListAsync());
         }
 
         // GET: Subjects/Details/5
@@ -148,14 +148,14 @@ namespace SMS.Controllers
             {
                 _context.Subjects.Remove(subject);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool SubjectExists(int id)
         {
-          return _context.Subjects.Any(e => e.Id == id);
+            return _context.Subjects.Any(e => e.Id == id);
         }
     }
 }

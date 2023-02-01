@@ -12,9 +12,9 @@ namespace SMS.Controllers
 {
     public class EventsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly SMSContext _context;
 
-        public EventsController(ApplicationDbContext context)
+        public EventsController(SMSContext context)
         {
             _context = context;
         }
@@ -56,7 +56,7 @@ namespace SMS.Controllers
         {
             _context.Add(@event);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));       
+            return RedirectToAction(nameof(Index));
 
         }
 
@@ -142,14 +142,14 @@ namespace SMS.Controllers
             {
                 _context.Events.Remove(@event);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool EventExists(int id)
         {
-          return _context.Events.Any(e => e.Id == id);
+            return _context.Events.Any(e => e.Id == id);
         }
     }
 }

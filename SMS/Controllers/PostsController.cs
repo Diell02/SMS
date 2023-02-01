@@ -12,17 +12,17 @@ namespace SMS.Controllers
 {
     public class PostsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly SMSContext _context;
 
-        public PostsController(ApplicationDbContext context)
+        public PostsController(SMSContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Posts.Include(p => p.Group);
-            return View(await applicationDbContext.ToListAsync());
+            var context = _context.Posts.Include(p => p.Group);
+            return View(await context.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -137,21 +137,21 @@ namespace SMS.Controllers
         {
             if (_context.Posts == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Post'  is null.");
+                return Problem("Entity set 'SMSContext.Post'  is null.");
             }
             var post = await _context.Posts.FindAsync(id);
             if (post != null)
             {
                 _context.Posts.Remove(post);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PostExists(int id)
         {
-          return _context.Posts.Any(e => e.Id == id);
+            return _context.Posts.Any(e => e.Id == id);
         }
     }
 }

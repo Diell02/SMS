@@ -12,16 +12,16 @@ namespace SMS.Controllers
 {
     public class EventCategoriesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly SMSContext _context;
 
-        public EventCategoriesController(ApplicationDbContext context)
+        public EventCategoriesController(SMSContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-              return View(await _context.EventCategories.ToListAsync());
+            return View(await _context.EventCategories.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -138,14 +138,14 @@ namespace SMS.Controllers
             {
                 _context.EventCategories.Remove(eventCategory);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool EventCategoryExists(int id)
         {
-          return _context.EventCategories.Any(e => e.Id == id);
+            return _context.EventCategories.Any(e => e.Id == id);
         }
     }
 }
