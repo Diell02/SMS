@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SMS.Models;
+using System.Reflection.Emit;
 
 namespace SMS.Data;
 
@@ -22,6 +23,10 @@ public class SMSContext : IdentityDbContext<SMSUser>
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        builder.Entity<Post>()
+                .HasOne(p => p.Group)
+                .WithMany(g => g.Posts)
+                .HasForeignKey(p => p.GroupId);
         base.OnModelCreating(builder);
     }
 }

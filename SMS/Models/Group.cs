@@ -8,5 +8,6 @@
         public string CreatedBy { get; set; }
         public int SubjectId { get; set; }
         public Subject Subject { get; set; }
+        public ICollection<Post> Posts { get; set; }
     }
 }

@@ -264,25 +264,23 @@ namespace SMS.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime>("CreatedAtUTC")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("GroupId");
 
@@ -473,11 +471,17 @@ namespace SMS.Migrations
 
             modelBuilder.Entity("SMS.Models.Post", b =>
                 {
-                    b.HasOne("SMS.Models.Group", "Group")
+                    b.HasOne("SMS.Models.SMSUser", "CreatedBy")
                         .WithMany()
+                        .HasForeignKey("CreatedById");
+
+                    b.HasOne("SMS.Models.Group", "Group")
+                        .WithMany("Posts")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreatedBy");
 
                     b.Navigation("Group");
                 });
@@ -485,6 +489,11 @@ namespace SMS.Migrations
             modelBuilder.Entity("SMS.Models.EventCategory", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("SMS.Models.Group", b =>
+                {
+                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }

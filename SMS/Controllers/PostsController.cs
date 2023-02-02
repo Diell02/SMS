@@ -1,28 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SMS.Data;
 using SMS.Models;
+using SMS.Validators;
 
 namespace SMS.Controllers
 {
+    [Authorize]
     public class PostsController : Controller
     {
         private readonly SMSContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PostsController(SMSContext context)
+        public PostsController(SMSContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int groupId)
         {
-            var context = _context.Posts.Include(p => p.Group);
-            return View(await context.ToListAsync());
+            var posts = await _context.Posts
+                .Where(p => p.GroupId == groupId)
+                .ToListAsync();
+
+            return View(posts);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -42,26 +52,36 @@ namespace SMS.Controllers
 
             return View(post);
         }
-
-        public IActionResult Create()
+        private SMSUser GetApplicationUser(ClaimsPrincipal principal)
         {
-            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id");
-            return View();
+            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+            return user;
+        }
+
+        public IActionResult Create(int groupId)
+        {
+            var post = new Post { GroupId = groupId };
+            return View(post);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreatedAtUTC,Username,CreatedBy,GroupId")] Post post)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreatedBy,GroupId")] Post post)
         {
             ModelState.Remove("CreatedBy");
+            ModelState.Remove("Group");
             if (ModelState.IsValid)
             {
+                var userAccessor = _httpContextAccessor.HttpContext.User;
+                post.CreatedBy = GetApplicationUser(userAccessor);
                 _context.Add(post);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", "Groups", new { id = post.GroupId });
             }
-            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id", post.GroupId);
-            return View(post);
+            return RedirectToAction("Details", "Groups", new { id = post.GroupId });
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -76,41 +96,49 @@ namespace SMS.Controllers
             {
                 return NotFound();
             }
-            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id", post.GroupId);
+
             return View(post);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CreatedAtUTC,Username,CreatedBy,GroupId")] Post post)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,GroupId")] Post post)
         {
             if (id != post.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var validator = new PostValidator();
+            ValidationResult result = validator.Validate(post);
+
+            if (!result.IsValid)
             {
-                try
+                foreach (var error in result.Errors)
                 {
-                    _context.Update(post);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("", error.ErrorMessage);
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PostExists(post.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["GroupId"] = new SelectList(_context.Groups, "Id", "Id", post.GroupId);
-            return View(post);
+            try
+            {
+                var postToUpdate = await _context.Posts.FindAsync(id);
+                postToUpdate.Title = post.Title;
+                postToUpdate.Description = post.Description;
+                _context.Update(postToUpdate);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PostExists(post.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction("Details", "Groups", new { id = post.GroupId });
         }
 
         public async Task<IActionResult> Delete(int? id)
@@ -121,7 +149,6 @@ namespace SMS.Controllers
             }
 
             var post = await _context.Posts
-                .Include(p => p.Group)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
@@ -146,7 +173,7 @@ namespace SMS.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details", "Groups", new { id = post.GroupId });
         }
 
         private bool PostExists(int id)
