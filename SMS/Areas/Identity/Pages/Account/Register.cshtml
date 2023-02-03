@@ -2,76 +2,317 @@
 @model RegisterModel
 @{
     ViewData["Title"] = "Register";
+    Layout = null;
 }
+<title>@ViewData["Title"] - SMS</title>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/SMS.styles.css" asp-append-version="true" />
+<style>
+    body {
+        background-color: #181818;
+    }
 
-<h1>@ViewData["Title"]</h1>
+    .my-form-control {
+        position: relative;
+        margin-top: 18px;
+        margin-bottom: 8px;
+        width: 298px;
+        text-align: center;
+    }
 
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating">
-                <input asp-for="Input.FirstName" class="form-control" autocomplete="firstname" aria-required="true" />
-                <label asp-for="Input.FirstName"></label>
-                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-floating">
-                <input asp-for="Input.LastName" class="form-control" autocomplete="lastname" aria-required="true" />
-                <label asp-for="Input.LastName"></label>
-                <span asp-validation-for="Input.LastName" class="text-danger"></span>
-            </div>
-            <div class="form-floating">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
-                <label asp-for="Input.Email"></label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-floating">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
-                <label asp-for="Input.Password"></label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-floating">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
-                <label asp-for="Input.ConfirmPassword"></label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
+        .my-form-control input {
+            background-color: transparent;
+            border: 0;
+            border-bottom: 2px white solid;
+            display: block;
+            width: 100%;
+            padding: 8px 0;
+            font-size: 14px;
+            color: white;
+            display: inline-block;
+        }
+
+            .my-form-control input:focus,
+            .my-form-control input:valid {
+                outline: 0;
+                border-bottom-color: white;
             }
-        </section>
+
+        .my-form-control label {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            pointer-events: none;
+        }
+
+            .my-form-control label span {
+                display: inline-block;
+                font-size: 14px;
+                min-width: 5px;
+                color: white;
+                transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            }
+
+        .my-form-control input:focus + label span,
+        .my-form-control input:valid + label span {
+            color: orange;
+            transform: translateY(-30px);
+        }
+
+    .button-login {
+        --color: #B22222;
+        padding: 0.8em 1.7em;
+        background-color: transparent;
+        border-radius: .3em;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: .5s;
+        font-weight: 400;
+        font-size: 17px;
+        border: 3px solid;
+        font-family: inherit;
+        text-transform: uppercase;
+        color: var(--color);
+        z-index: 1;
+    }
+
+    .button-home {
+        --color: #007FFF;
+        padding: 0.8em 1.7em;
+        background-color: transparent;
+        border-radius: .3em;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: .5s;
+        font-weight: 400;
+        font-size: 17px;
+        border: 3px solid;
+        font-family: inherit;
+        text-transform: uppercase;
+        color: var(--color);
+        z-index: 1;
+    }
+
+    .button-register {
+        --color: #2E8B57;
+        padding: 0.8em 1.7em;
+        background-color: transparent;
+        border-radius: .3em;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: .5s;
+        font-weight: 400;
+        font-size: 17px;
+        border: 3px solid;
+        font-family: inherit;
+        text-transform: uppercase;
+        color: var(--color);
+        z-index: 1;
+    }
+
+        .button-login::before, .button-register::before, .button-home::before, .button-login::after, .button-register::after, .button-home::after{
+            content: '';
+            display: block;
+            width: 50px;
+            height: 50px;
+            transform: translate(-50%, -50%);
+            position: absolute;
+            border-radius: 50%;
+            z-index: -1;
+            background-color: var(--color);
+            transition: 1s ease;
+        }
+
+        .button-login::before, .button-register::before, .button-home::before {
+            top: -1em;
+            left: -1em;
+        }
+
+        .button-login::after, .button-register::after, .button-home::after {
+            left: calc(100% + 1em);
+            top: calc(100% + 1em);
+        }
+
+        .button-login:hover::before, .button-register:hover::before, .button-home:hover::before, .button-login:hover::after, .button-register:hover::after, .button-home:hover::after {
+            height: 410px;
+            width: 410px;
+        }
+
+        .button-login:hover, .button-register:hover, .button-home:hover {
+            color: rgb(10, 25, 30);
+        }
+
+        .button-login:active, .button-register:active, .button-home:active {
+            filter: brightness(.8);
+        }
+
+    .card {
+        --background: linear-gradient(to left, #f7ba2b 0%, #ea5358 100%);
+        width: 368px;
+        height: 490px;
+        padding: 5px;
+        border-radius: 1rem;
+        overflow: visible;
+        background: #f7ba2b;
+        background: var(--background);
+        position: relative;
+        z-index: 1;
+    }
+
+        .card::after {
+            position: absolute;
+            content: "";
+            top: 30px;
+            left: 0;
+            right: 0;
+            z-index: -1;
+            height: 100%;
+            width: 100%;
+            transform: scale(0.8);
+            filter: blur(25px);
+            background: #f7ba2b;
+            background: var(--background);
+            transition: opacity .5s;
+        }
+
+    .card-info {
+        --color: #181818;
+        background: var(--color);
+        color: var(--color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        border-radius: .7rem;
+    }
+
+    .h3.mb-3.font-weight-normal {
+        background-image: linear-gradient(to left, #f7ba2b 0%, #ea5358 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+</style>
+
+<section>
+    <a class="button-home btn btn-block" asp-area="" asp-controller="Home" asp-action="Index" style="float: left; margin:12px;"><b>Home</b></a>
+    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="button-login btn btn-block" style="float: right; margin:12px;"><b>Login</b></a>
+    <div class="row d-flex justify-content-center col-12">
+        <div class="card">
+            <div class="card-info">
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="py-2">
+                    <div class="d-flex justify-content-center">
+                        <h1 class="h3 mb-3 font-weight-normal">Register</h1>
+                    </div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="d-flex justify-content-center">
+                        <div class="my-form-control d-flex justify-content-center">
+                            <input asp-for="Input.FirstName" type="value" required autofocus autocomplete="firstname" aria-required="true" />
+                            <label>
+                                <span style="transition-delay:0ms">F</span>
+                                <span style="transition-delay:50ms">i</span>
+                                <span style="transition-delay:100ms">r</span>
+                                <span style="transition-delay:150ms">s</span>
+                                <span style="transition-delay:200ms">t</span>
+                                <span style="transition-delay:250ms"> </span>
+                                <span style="transition-delay:300ms">N</span>
+                                <span style="transition-delay:350ms">a</span>
+                                <span style="transition-delay:400ms">m</span>
+                                <span style="transition-delay:450ms">e</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="my-form-control d-flex justify-content-center">
+                            <input asp-for="Input.LastName" type="value" required autofocus autocomplete="lastname" aria-required="true" />
+                            <label>
+                                <span style="transition-delay:0ms">L</span>
+                                <span style="transition-delay:50ms">a</span>
+                                <span style="transition-delay:100ms">s</span>
+                                <span style="transition-delay:150ms">t</span>
+                                <span style="transition-delay:200ms"> </span>
+                                <span style="transition-delay:250ms">N</span>
+                                <span style="transition-delay:300ms">a</span>
+                                <span style="transition-delay:350ms">m</span>
+                                <span style="transition-delay:400ms">e</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="my-form-control d-flex justify-content-center">
+                            <input asp-for="Input.Email" type="value" required autofocus autocomplete="username" aria-required="true" />
+                            <label>
+                                <span style="transition-delay:0ms">E</span>
+                                <span style="transition-delay:50ms">m</span>
+                                <span style="transition-delay:100ms">a</span>
+                                <span style="transition-delay:150ms">i</span>
+                                <span style="transition-delay:200ms">l</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="my-form-control">
+                            <input asp-for="Input.Password" type="password" required autocomplete="new-password" aria-required="true" />
+                            <label>
+                                <span style="transition-delay:0ms">P</span>
+                                <span style="transition-delay:50ms">a</span>
+                                <span style="transition-delay:100ms">s</span>
+                                <span style="transition-delay:150ms">s</span>
+                                <span style="transition-delay:200ms">w</span>
+                                <span style="transition-delay:250ms">o</span>
+                                <span style="transition-delay:300ms">r</span>
+                                <span style="transition-delay:350ms">d</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="my-form-control">
+                            <input asp-for="Input.ConfirmPassword" type="password" required autocomplete="new-password" aria-required="true" />
+                            <label>
+                                <span style="transition-delay:0ms">C</span>
+                                <span style="transition-delay:50ms">o</span>
+                                <span style="transition-delay:100ms">n</span>
+                                <span style="transition-delay:150ms">f</span>
+                                <span style="transition-delay:200ms">i</span>
+                                <span style="transition-delay:250ms">r</span>
+                                <span style="transition-delay:300ms">m</span>
+                                <span style="transition-delay:350ms"> </span>
+                                <span style="transition-delay:400ms">P</span>
+                                <span style="transition-delay:450ms">a</span>
+                                <span style="transition-delay:500ms">s</span>
+                                <span style="transition-delay:550ms">s</span>
+                                <span style="transition-delay:600ms">w</span>
+                                <span style="transition-delay:650ms">o</span>
+                                <span style="transition-delay:700ms">r</span>
+                                <span style="transition-delay:750ms">d</span>
+                            </label>
+                        </div>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group row d-flex justify-content-center mt-6">
+                        <button id="registerSubmit" type="submit" class="button-register mt-4"><b>Register</b></button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-</div>
+
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
