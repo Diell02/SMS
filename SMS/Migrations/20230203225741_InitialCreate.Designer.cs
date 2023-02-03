@@ -12,7 +12,7 @@ using SMS.Data;
 namespace SMS.Migrations
 {
     [DbContext(typeof(SMSContext))]
-    [Migration("20230202172455_InitialCreate")]
+    [Migration("20230203225741_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,6 +256,26 @@ namespace SMS.Migrations
                     b.HasIndex("SubjectId");
 
                     b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("SMS.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("SMS.Models.Post", b =>

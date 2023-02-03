@@ -20,6 +20,7 @@ public class SMSContext : IdentityDbContext<SMSUser>
     public DbSet<Group> Groups { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Post> Posts { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
