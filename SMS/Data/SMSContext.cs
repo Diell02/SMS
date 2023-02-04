@@ -15,6 +15,7 @@ public class SMSContext : IdentityDbContext<SMSUser>
     }
 
     public DbSet<Event> Events { get; set; }
+    public DbSet<Invitation> Invitations { get; set; }
     public DbSet<EventCategory> EventCategories { get; set; }
     public DbSet<Grade> Grades { get; set; }
     public DbSet<Group> Groups { get; set; }

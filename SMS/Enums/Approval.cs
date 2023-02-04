@@ -2,6 +2,7 @@
 {
     public enum Approval
     {
+        NotInvited,
         Pending,
         Accepted,
         Rejected

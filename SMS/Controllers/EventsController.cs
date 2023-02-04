@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SMS.Data;
 using SMS.Models;
+using SMS.Validators;
 
 namespace SMS.Controllers
 {
@@ -15,10 +18,12 @@ namespace SMS.Controllers
     public class EventsController : Controller
     {
         private readonly SMSContext _context;
+        private readonly UserManager<SMSUser> _userManager;
 
-        public EventsController(SMSContext context)
+        public EventsController(SMSContext context, UserManager<SMSUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -56,6 +61,24 @@ namespace SMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CategoryId,Created")] Event @event)
         {
+            var validator = new EventValidator();
+            ValidationResult result = validator.Validate(@event);
+
+            if (!result.IsValid)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.ErrorMessage);
+                }
+
+                return View(@event);
+            }
+
+            var userid = _userManager.GetUserId(HttpContext.User);
+            SMSUser creator = _userManager.FindByIdAsync(userid).Result;
+
+            @event.CreatedBy = creator.Id;
+
             _context.Add(@event);
             await _context.SaveChangesAsync();
 
@@ -100,28 +123,37 @@ namespace SMS.Controllers
                 return NotFound();
             }
 
-            ModelState.Remove("Category");
-            if (ModelState.IsValid)
+            var validator = new EventValidator();
+            ValidationResult result = validator.Validate(@event);
+
+            if (!result.IsValid)
             {
-                try
+                foreach (var error in result.Errors)
                 {
-                    _context.Update(@event);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("", error.ErrorMessage);
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EventExists(@event.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+
+                return View(@event);
             }
-            return View(@event);
+
+            try
+            {
+                _context.Update(@event);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!EventExists(@event.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+
         }
 
         public async Task<IActionResult> Delete(int? id)
@@ -148,7 +180,7 @@ namespace SMS.Controllers
         {
             if (_context.Events == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Events'  is null.");
+                return Problem("Entity set 'SMSContext.Events'  is null.");
             }
             var @event = await _context.Events.FindAsync(id);
             if (@event != null)
@@ -163,6 +195,11 @@ namespace SMS.Controllers
         private bool EventExists(int id)
         {
             return _context.Events.Any(e => e.Id == id);
+        }
+
+        public IActionResult SelectUsers(int eventId)
+        {
+            return RedirectToAction("SelectUsers", "Invitations", new { eventId = eventId });
         }
     }
 }

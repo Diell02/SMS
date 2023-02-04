@@ -8,5 +8,6 @@
         public int CategoryId { get; set; }
         public EventCategory Category { get; set; }
         public DateTime Created { get; set; } //Meaning when it will be held
+        public string CreatedBy { get; set; }
     }
 }
