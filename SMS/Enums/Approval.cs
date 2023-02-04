@@ -4,7 +4,6 @@
     {
         NotInvited,
         Pending,
-        Accepted,
-        Rejected
+        Accepted
     }
 }

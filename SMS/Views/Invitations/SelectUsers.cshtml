@@ -45,7 +45,7 @@
                 @if (currentUserId == eventCreatedById)
                 {
                     <td>
-                        @if (invitation == null || (invitation.Status == Approval.NotInvited || invitation.Status == Approval.Rejected))
+                        @if (invitation == null || (invitation.Status == Approval.NotInvited))
                         {
                             if (currentUserId == eventCreatedById)
                             {
