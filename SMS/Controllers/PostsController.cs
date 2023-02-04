@@ -79,6 +79,18 @@ namespace SMS.Controllers
                 post.CreatedBy = GetApplicationUser(userAccessor);
                 _context.Add(post);
                 await _context.SaveChangesAsync();
+
+                var notification = new Notification
+                {
+                    Message = "Post created successfully",
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Add(notification);
+                await _context.SaveChangesAsync();
+
+                TempData["Notification"] = "Post created successfully";
+
                 return RedirectToAction("Details", "Groups", new { id = post.GroupId });
             }
             return RedirectToAction("Details", "Groups", new { id = post.GroupId });

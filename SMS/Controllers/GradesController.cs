@@ -58,6 +58,15 @@ namespace SMS.Controllers
         {
             _context.Add(grade);
             await _context.SaveChangesAsync();
+            var notification = new Notification
+            {
+                Message = "Grade created successfully",
+                CreatedAt = DateTime.Now
+            };
+            _context.Add(notification);
+            await _context.SaveChangesAsync();
+
+            TempData["Notification"] = "Grade created successfully";
             return RedirectToAction(nameof(Index));
 
         }

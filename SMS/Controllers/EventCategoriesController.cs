@@ -57,6 +57,15 @@ namespace SMS.Controllers
             {
                 _context.Add(eventCategory);
                 await _context.SaveChangesAsync();
+                var notification = new Notification
+                {
+                    Message = "Event Category created successfully",
+                    CreatedAt = DateTime.Now
+                };
+                _context.Add(notification);
+                await _context.SaveChangesAsync();
+
+                TempData["Notification"] = "Event Category created successfully";
                 return RedirectToAction(nameof(Index));
             }
             return View(eventCategory);
