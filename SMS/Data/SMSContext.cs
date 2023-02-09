@@ -22,6 +22,7 @@ public class SMSContext : IdentityDbContext<SMSUser>
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<Exam> Exams { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

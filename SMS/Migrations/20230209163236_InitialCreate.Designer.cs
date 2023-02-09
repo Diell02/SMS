@@ -12,7 +12,7 @@ using SMS.Data;
 namespace SMS.Migrations
 {
     [DbContext(typeof(SMSContext))]
-    [Migration("20230204112138_InitialCreate")]
+    [Migration("20230209163236_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -209,6 +209,31 @@ namespace SMS.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EventCategories");
+                });
+
+            modelBuilder.Entity("SMS.Models.Exam", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Teacher")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Exams");
                 });
 
             modelBuilder.Entity("SMS.Models.Grade", b =>
